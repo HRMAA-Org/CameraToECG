@@ -2,6 +2,7 @@ package com.adikul.camerademo
 
 import android.Manifest
 import android.content.ContentValues
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -51,21 +52,22 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
+
+            // Set up the listeners for take photo and video capture buttons
+            binding.imageCaptureButton.setOnClickListener { takePhoto() }
+
+            cameraExecutor = Executors.newSingleThreadExecutor()
+
+            imageCapture = ImageCapture.Builder().build()
         }
         else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-        // Set up the listeners for take photo and video capture buttons
-        binding.imageCaptureButton.setOnClickListener { takePhoto() }
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
-        imageCapture = ImageCapture.Builder().build()
     }
 
-    val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    private val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             val scale = camera!!.cameraInfo.zoomState.value!!.zoomRatio*detector.scaleFactor
             camera!!.cameraControl.setZoomRatio(scale)
@@ -85,7 +87,7 @@ class MainActivity : AppCompatActivity() {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraToECG")
             }
         }
 
@@ -109,8 +111,13 @@ class MainActivity : AppCompatActivity() {
                 override fun
                         onImageSaved(output: ImageCapture.OutputFileResults){
                     val msg = "Photo capture succeeded: ${output.savedUri}"
+                    Log.d("ImgTake", msg)
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
+                    val intent = Intent(this@MainActivity, ImagePreviewActivity::class.java)
+                    intent.putExtra("path", output.savedUri.toString())
+                    intent.putExtra("name", name)
+                    startActivity(intent)
                 }
             }
         )
