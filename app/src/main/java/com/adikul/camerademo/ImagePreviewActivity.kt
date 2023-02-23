@@ -1,6 +1,5 @@
 package com.adikul.camerademo
 
-import android.R
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -25,8 +24,6 @@ class ImagePreviewActivity : AppCompatActivity() {
         val name = intent.getStringExtra("name").toString()
 
         loadImageFromStorage(name)
-
-
     }
 
     private fun loadImageFromStorage(name: String) {
@@ -43,6 +40,12 @@ class ImagePreviewActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
                 val intent = Intent(this@ImagePreviewActivity, MainActivity::class.java)
+                startActivity(intent)
+            }
+
+            binding.nextFabIpa.setOnClickListener {
+                val intent = Intent(this@ImagePreviewActivity, GraphAnalyzeActivity::class.java)
+                intent.putExtra("graph_path","${Environment.getExternalStorageDirectory().absolutePath}/Pictures/CameraToECG/$name.jpg")
                 startActivity(intent)
             }
         } catch (e: FileNotFoundException) {
